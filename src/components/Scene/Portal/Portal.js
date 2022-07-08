@@ -2,16 +2,17 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { Vertex } from './Vertex'
 import { Fragment } from './Fragment'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 // Global variables
 let currentRef = null
-//const gui = new dat.GUI({ width: 600 })
+
 // Scene, camera, renderer
 const scene = new THREE.Scene()
 //scene.background = new THREE.Color(0x8536b)
 const camera = new THREE.PerspectiveCamera(25, 100 / 100, 0.1, 250)
 scene.add(camera)
-camera.position.set(10, 10, 10)
+camera.position.set(30, 20, 30)
 camera.lookAt(new THREE.Vector3())
 
 const renderer = new THREE.WebGLRenderer()
@@ -30,6 +31,7 @@ renderer.setSize(100, 100)
 const orbitControls = new OrbitControls(camera, renderer.domElement)
 
 orbitControls.enableDamping = true
+orbitControls.target.set(0, 5, 0)
 
 // Resize canvas
 const resize = () => {
@@ -53,25 +55,37 @@ const planeMaterial = new THREE.ShaderMaterial({
 const geometry = new THREE.PlaneBufferGeometry(5, 5, 500, 500)
 
 const plane = new THREE.Mesh(geometry, planeMaterial)
-plane.rotation.x = Math.PI * -0.5
 
 scene.add(plane)
 
-//Grid helper
-const size = 10
-const divisions = 10
+//load model
+const gltfLoader = new GLTFLoader()
 
-// Axes helper
+gltfLoader.load('./Portal.gltf', (gltf) => {
+  scene.add(gltf.scene)
+})
 
-const axesHelper = new THREE.AxesHelper(5)
-scene.add(axesHelper)
+//lights
+const DirectionalLight = new THREE.DirectionalLight(0xffffff, 3)
+DirectionalLight.position.set(20, 20, 20)
+scene.add(DirectionalLight)
 
-const gridHelper = new THREE.GridHelper(size, divisions)
-scene.add(gridHelper)
+const ao = new THREE.AmbientLight(0xffffff, 0.7)
+scene.add(ao)
+
+const envMap = new THREE.CubeTextureLoader().load([
+  './hdri/px.png',
+  './hdri/nx.png',
+  './hdri/py.png',
+  './hdri/ny.png',
+  './hdri/pz.png',
+  './hdri/nz.png',
+])
+scene.environment = envMap
 
 // Animate the scene
 const animate = () => {
-  planeMaterial.uniforms.uTime.value += 0.03
+  planeMaterial.uniforms.uTime.value += 0.1
   orbitControls.update()
   renderer.render(scene, camera)
   requestAnimationFrame(animate)

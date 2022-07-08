@@ -78,18 +78,18 @@ float cnoise(vec3 P){
 void main(){
   vec4 modelPosition = modelMatrix * vec4(position, 1);
   float PosX = pow(modelPosition.x - 0.0, 2.0);
-  float PosZ = pow(modelPosition.z - 0.0, 2.0);
+  float PosZ = pow(modelPosition.y - 0.0, 2.0);
   float Circle = sqrt(PosX + PosZ);
   float WaveCircle = sin(Circle * 20.0 - uTime) * 0.05;
-  modelPosition.y += WaveCircle + 0.3;
+  modelPosition.z += WaveCircle + 0.3;
   for(float i = 1.0; i< 10.0; i++){
-    modelPosition.y -= abs(cnoise(vec3(modelPosition.xz * 3.15 * i, uTime * 0.2)) * 0.15 / i);
+    modelPosition.z -= abs(cnoise(vec3(modelPosition.xy * 3.15 * i, uTime * 0.2)) * 0.15 / i);
 
   }
-  
+  modelPosition.y += 5.5;
   gl_Position = projectionMatrix *
                   viewMatrix *
                   modelPosition;   
-  vElevation = modelPosition.y;                                 
+  vElevation = modelPosition.z;                                 
 }
 `
